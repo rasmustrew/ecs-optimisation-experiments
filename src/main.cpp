@@ -1,52 +1,46 @@
 #include <ctime>
+#include <variant>
 #include <iostream>
-#include "ecs/experiments.h"
-#include <ecs/ecsSimple.h>
-
 #include <chrono>
+#include <filesystem>
+#include <ecs/experiments.h>
+#include <ecs/ecsSimple.h>
+#include <ecs/timeReport.h>
+#include <ecs/worldNames.h>
+
+#include <outputFormatting.h>
+
+
+using World = std::variant<WorldSimple>;
 
 const int iterationsWarmup = 100;
 const int iterationsReal = 10000;
 const int numberOfEntitiesWarmup = 1000;
-const std::array<int, 3> entitiesSet{ 100, 1000, 10000 };
-
-
-
-
-void RunWarmup() {
-	for (int i = 0; i < iterationsWarmup; i++) {
-		auto world = WorldSimple{};
-		RunExperiments(world, numberOfEntitiesWarmup);
-	}
-}
+const std::vector<int> entitiesSet = { 100, 1000, 10000 };
+const std::vector<World> worlds = { WorldSimple{}, WorldSimple{} };
 
 int main(int, char**) {
-	TimeReport aggregatedTimeReportWarmup{};
 
-	for (const int& numberOfEntities : entitiesSet) {
-		ReseedRandomGenerator();
-		RunWarmup();
+	std::vector<std::vector<TimeReport>> timeReportSets{};
+	std::vector<std::string_view> worldNames{};
 
-		std::cout << "ENTITIES: " << numberOfEntities << "\n";
-		ReseedRandomGenerator();
-		const auto startTime = std::chrono::steady_clock::now();
-		TimeReport aggregatedTimeReport{};
+	for (auto& w : worlds) {
+		std::visit([&](auto& world) { // Get underlying type T from std::variant<T>
+			using TWorld = std::remove_cvref_t<decltype(world)>; // Remove &
+			auto worldName = WORLD_NAME<TWorld>;
+			std::cout << "Running: " << worldName << "\n";
+			worldNames.push_back(worldName);
+			auto timeReportSet = RunExperiments<TWorld>(10, 10, 10, entitiesSet);
+			timeReportSets.push_back(timeReportSet);
+		}, w);
 
-		for (int i = 0; i < iterationsReal; i++) {
-			auto world = WorldSimple{};
-			aggregatedTimeReport += RunExperiments(world, numberOfEntities);
-		}
-
-		const auto endTime = std::chrono::steady_clock::now();
-		const std::chrono::duration<double, std::micro> elapsedTime = endTime - startTime;
-		std::cout << "TOTAL: \n";
-		aggregatedTimeReport.Print();
-
-		aggregatedTimeReport /= iterationsReal;
-		std::cout << "PER RUN: \n";
-		aggregatedTimeReport.Print();
-
-		std::cout << "Elapsed wall-clock (Full): " << elapsedTime.count() << " us \n";
 	}
 
+
+
+	TimeReport aggregatedTimeReportWarmup{};
+
+
+
+	PrintResultsToFolder(worldNames, entitiesSet, timeReportSets, std::filesystem::path{ "./output" });
 }
