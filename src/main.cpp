@@ -3,12 +3,12 @@
 #include <iostream>
 #include <chrono>
 #include <filesystem>
-#include <ecs/experiments.h>
-#include <ecs/ecsSimple.h>
-#include <ecs/timeReport.h>
-#include <ecs/worldNames.h>
+#include "experiment/experiments.h"
+#include "ecs/ecsSimple.h"
+#include "experiment/timeReport.h"
+#include "experiment/worldNames.h"
 
-#include <outputFormatting.h>
+#include "experiment/outputFormatting.h"
 
 
 using World = std::variant<WorldSimple>;

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "ecsBase.h"
-#include "ecsSimple.h"
-#include "components.h"
+#include "../ecs/ecsBase.h"
+#include "../ecs/ecsSimple.h"
+#include "../ecs/components.h"
 #include "timeReport.h"
 
 #include <iostream>
