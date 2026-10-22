@@ -1,6 +1,6 @@
 #pragma once
-#include "ecsBase.h"
-#include "components.h"
+#include "../ecsBase.h"
+#include "../components.h"
 
 #include <unordered_map>
 #include <typeindex>
@@ -8,6 +8,7 @@
 #include <tuple>
 #include <vector>
 #include <string>
+
 
 using ComponentsMap = std::unordered_map<std::type_index, std::any>;
 
@@ -17,76 +18,74 @@ Assumption: Only 1 of any Component Type is added to an Entity
 n = number of entities
 t = number of component types
 */
-class WorldSimple {
+class World1 {
 private:
-	std::unordered_map<Entity, ComponentsMap> Entities{};
+	std::vector<std::tuple<Entity, ComponentsMap>> Entities{};
 	EntityId CurrentId{};
 
 public:
 	/*
 	Expected Runtime: O(1) (Amortized)
-	Worst Case Runtime: O(n)
+	Worst Case Runtime: O(n) (if resizing Entities)
 	*/
 	Entity CreateEntity() {
 		Entity entity{ CurrentId++ };
-		Entities.emplace(entity, ComponentsMap{});
+		Entities.push_back(std::tuple{ entity, ComponentsMap{} });
 		return entity;
 	}
 
 	/*
-	Expected Runtime: O(1)
+	Expected Runtime: O(n)
 	Worst Case Runtime: O(n)
 	*/
 	void RemoveEntity(Entity entity) {
-		Entities.erase(entity);
+		std::erase_if(Entities, [entity](auto& tuple) {
+			return std::get<Entity>(tuple) == entity;
+		});
 	}
 
 
 	/*
-	Expected Runtime: O(1) + O(1)
-	Worst Case Runtime: O(n) + O(t)
+	Expected Runtime: O(n)
+	Worst Case Runtime: O(n + t) (if resizing componentsMap)
 	*/
 	template<ComponentType T>
 	void AddComponent(Entity entity, T component) {
-		auto result = Entities.find(entity);
-		//if (result == Entities.end()) {
-		//	throw std::string("Could not find Entity: ") + std::to_string(entity.Id);
-		//}
-
-		auto& componentsMap = result->second;
-		componentsMap.emplace(std::type_index(typeid(T)), component);
+		for (auto& [innerEntity, componentsMap] : Entities) {
+			if (innerEntity == entity) {
+				componentsMap.emplace(std::type_index(typeid(T)), component);
+				return;
+			}
+		}
 	}
 
 	/*
-	Expected Runtime: O(1) + O(1)
-	Worst Case Runtime: O(n) + O(t)
+	Expected Runtime: O(n)
+	Worst Case Runtime: O(n + t) (if resizing componentsMap)
 	*/
 	template<ComponentType T>
 	void RemoveComponent(Entity entity) {
-		auto result = Entities.find(entity);
-		//if (result == Entities.end()) {
-		//	throw std::string("Could not find Entity: ") + std::to_string(entity.Id);
-		//}
-
-		auto& componentsMap = result->second;
-		componentsMap.erase(std::type_index(typeid(T)));
+		for (auto& [innerEntity, componentsMap] : Entities) {
+			if (innerEntity == entity) {
+				componentsMap.erase(std::type_index(typeid(T)));
+				return;
+			}
+		}
 	}
 
 	/*
-	Expected Runtime: O(1) + O(1)
-	Worst Case Runtime: O(n) + O(t)
+	Expected Runtime: O(n)
+	Worst Case Runtime: O(n + t) (if hash collisions)
 	*/
 	template<ComponentType T>
 	T& GetComponent(Entity entity) {
-		auto result = Entities.find(entity);
-		//if (result == Entities.end()) {
-		//	throw std::string("Could not find Entity: ") + std::to_string(entity.Id);
-		//}
-
-		auto& componentsMap = result->second;
-		auto resultComponents = componentsMap.find(std::type_index(typeid(T)));
-		std::any& component = resultComponents->second;
-		return std::any_cast<T&>(component);
+		for (auto& [innerEntity, componentsMap] : Entities) {
+			if (innerEntity == entity) {
+				auto resultComponents = componentsMap.find(std::type_index(typeid(T)));
+				std::any& component = resultComponents->second;
+				return std::any_cast<T&>(component);
+			}
+		}
 	}
 
 	/*
@@ -94,22 +93,22 @@ public:
 	*/
 	std::vector<Entity> GetEntities() {
 		std::vector<Entity> entities{};
-		for (auto& [entity, componentList] : Entities) {
+		for (auto& [entity, componentsMap] : Entities) {
 			entities.push_back(entity);
 		}
 		return entities;
 	}
 
 	/*
-	Expected Runtime: O(n) + O(t)
-	Worst Case Runtime: O(n) + O(t^2)
+	Expected Runtime: O(n * t)
+	Worst Case Runtime: O(n * t^2) (if hash collisions)
 	*/
 	template<ComponentType... Ts>
 	std::vector<Entity> GetEntitiesWithComponents() {
 		std::vector<Entity> entities{};
 
-		for (auto& [entity, componentList] : Entities) {
-			if ((componentList.contains(std::type_index(typeid(Ts))) && ...)) {
+		for (auto& [entity, componentsMap] : Entities) {
+			if ((componentsMap.contains(std::type_index(typeid(Ts))) && ...)) {
 				entities.push_back(entity);
 			}
 		}
@@ -117,8 +116,8 @@ public:
 	}
 
 	/*
-	Expected Runtime: O(n) + O(t)
-	Worst Case Runtime: O(n) + O(t^2)
+	Expected Runtime: O(n * t)
+	Worst Case Runtime: O(n * t^2) (if hash collisions)
 	*/
 	template<ComponentType... Ts>
 	std::vector<std::tuple<Entity, Ts&...>> Query() {

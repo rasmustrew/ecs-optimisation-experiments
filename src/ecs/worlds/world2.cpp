@@ -7,7 +7,7 @@
 #include <memory>
 #include <string>
 
-#include "ecsBase.h"
+#include "../ecsBase.h"
 
 class IStore {
 };

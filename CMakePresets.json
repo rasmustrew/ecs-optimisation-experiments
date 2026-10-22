@@ -28,6 +28,16 @@
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release"
             }
+        },
+        {
+            "name": "profile",
+            "displayName": "Profile x64",
+            "inherits": "base",
+            "binaryDir": "${sourceDir}/build/profile",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+                "ENABLE_CLANG_TIDY_ON_BUILD": false
+            }
         }
     ],
     "buildPresets": [
@@ -38,6 +48,10 @@
         {
             "name": "release",
             "configurePreset": "release"
+        },
+        {
+            "name": "profile",
+            "configurePreset": "profile"
         }
     ]
 }

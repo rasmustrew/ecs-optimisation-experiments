@@ -4,7 +4,7 @@ inline constexpr float CHANCE_OF_REMOVAL_VS_ADDITION = 0.5f;
 
 template <typename TWorld>
 	requires ExperimentWorldLike<TWorld>
-std::vector<TimeReport> RunExperiments(int iterationsReal, int iterationsWarmup, int entityAmountWarmup, const std::vector<int> entityAmountSet) {
+std::vector<TimeReport> RunExperiments(int iterationsWarmup, int iterationsReal, int entityAmountWarmup, const std::vector<int> entityAmountSet) {
 	std::vector<TimeReport> timeReportSet{};
 	for (const int& numberOfEntities : entityAmountSet) {
 		ReseedRandomGenerator();

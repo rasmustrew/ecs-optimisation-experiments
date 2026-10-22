@@ -4,20 +4,21 @@
 #include <chrono>
 #include <filesystem>
 #include "experiment/experiments.h"
-#include "ecs/ecsSimple.h"
+#include "ecs/worlds/world0.h"
+#include "ecs/worlds/world1.h"
 #include "experiment/timeReport.h"
 #include "experiment/worldNames.h"
 
 #include "experiment/outputFormatting.h"
 
 
-using World = std::variant<WorldSimple>;
+using World = std::variant<World0, World1>;
 
 const int iterationsWarmup = 100;
-const int iterationsReal = 10000;
+const int iterationsReal = 100;
 const int numberOfEntitiesWarmup = 1000;
-const std::vector<int> entitiesSet = { 100, 1000, 10000 };
-const std::vector<World> worlds = { WorldSimple{}, WorldSimple{} };
+const std::vector<int> entitiesSet = { 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000 };
+const std::vector<World> worlds = { World1{} };
 
 int main(int, char**) {
 
@@ -30,17 +31,10 @@ int main(int, char**) {
 			auto worldName = WORLD_NAME<TWorld>;
 			std::cout << "Running: " << worldName << "\n";
 			worldNames.push_back(worldName);
-			auto timeReportSet = RunExperiments<TWorld>(10, 10, 10, entitiesSet);
+			auto timeReportSet = RunExperiments<TWorld>(iterationsWarmup, iterationsReal, numberOfEntitiesWarmup, entitiesSet);
 			timeReportSets.push_back(timeReportSet);
 		}, w);
 
 	}
-
-
-
-	TimeReport aggregatedTimeReportWarmup{};
-
-
-
 	PrintResultsToFolder(worldNames, entitiesSet, timeReportSets, std::filesystem::path{ "./output" });
 }

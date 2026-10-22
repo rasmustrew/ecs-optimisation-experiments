@@ -25,10 +25,15 @@ if(MSVC)
         /permissive-
         /external:W0
         $<$<CONFIG:Debug>:/Od /Ob0 /Oy->
+        $<$<CONFIG:RelWithDebInfo>:/Zi /Zo /Ob0 /Oy->
         $<$<CONFIG:Release>:/Gy /Oi>
         /WX
         /w44365
         /sdl
+    )
+
+    target_link_options(ECSExperiments PRIVATE
+        $<$<CONFIG:RelWithDebInfo>:/DEBUG:FULL>
     )
 endif()
 
@@ -36,6 +41,7 @@ include(CheckIPOSupported)
 check_ipo_supported(RESULT _ipo_supported)
 if(_ipo_supported)
     set_property(TARGET ECSExperiments PROPERTY INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)
+    set_property(TARGET ECSExperiments PROPERTY INTERPROCEDURAL_OPTIMIZATION_RELWITHDEBINFO FALSE)
 endif()
 
 get_filename_component(_compiler_dir "${CMAKE_CXX_COMPILER}" DIRECTORY)

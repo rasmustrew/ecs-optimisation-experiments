@@ -4,6 +4,8 @@
 #include <cstdint>
 #include <random>
 
+
+
 struct IntComponent {
 	int32_t Int1;
 	int32_t Int2;
@@ -167,6 +169,8 @@ struct LargeMixedComponentB {
 	std::array<char, 104> TextBlob2;
 	std::array<uint8_t, 128> Flags;
 };
+using Component = std::variant < IntComponent, FloatComponent, DoubleComponent, IntArrayComponent, FloatArrayComponent, TextComponent, BooleanComponent, MixedComponentA, MixedComponentB, MixedComponentC, MixedComponentD, MixedComponentE, LargeNumericComponent, LargeMixedComponentA, LargeMixedComponentB>;
+
 
 inline std::mt19937& GetRandomGenerator() {
 	static std::mt19937 generator(5);

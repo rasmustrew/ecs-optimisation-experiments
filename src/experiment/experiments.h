@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../ecs/ecsBase.h"
-#include "../ecs/ecsSimple.h"
 #include "../ecs/components.h"
 #include "timeReport.h"
 
