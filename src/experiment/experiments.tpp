@@ -111,6 +111,59 @@ void AddRandomComponents(TWorld& world, Entity entity) {
 
 template <typename TWorld>
 	requires ExperimentWorldLike<TWorld>
+void AddRandomLargeComponents(TWorld& world, Entity entity) {
+	const float randomChanceLargeNumeric = RandomFloat(0, 1);
+	if (randomChanceLargeNumeric >= CHANCE_OF_GETTING_COMPONENT_TYPE) {
+		LargeNumericComponent component{
+			CreateRandomIntComponent(),
+			CreateRandomFloatComponent(),
+			CreateRandomDoubleComponent(),
+			CreateRandomIntArrayComponent(),
+			CreateRandomFloatArrayComponent(),
+			CreateRandomInt64Array<128>(),
+			CreateRandomFloatArray<128>(),
+			CreateRandomDoubleArray<128>()
+		};
+		world.AddComponent(entity, component);
+	}
+
+	const float randomChanceLargeMixedA = RandomFloat(0, 1);
+	if (randomChanceLargeMixedA >= CHANCE_OF_GETTING_COMPONENT_TYPE) {
+		LargeMixedComponentA component{
+			CreateRandomMixedComponentA(),
+			CreateRandomMixedComponentB(),
+			CreateRandomMixedComponentC(),
+			CreateRandomTextComponent(),
+			CreateRandomBooleanComponent(),
+			RandomString<96>(),
+			RandomString<128>(),
+			CreateRandomIntArray<64>(),
+			CreateRandomFloatArray<64>(),
+			CreateRandomDoubleArray<64>()
+		};
+		world.AddComponent(entity, component);
+	}
+
+	const float randomChanceLargeMixedB = RandomFloat(0, 1);
+	if (randomChanceLargeMixedB >= CHANCE_OF_GETTING_COMPONENT_TYPE) {
+		LargeMixedComponentB component{
+			CreateRandomMixedComponentD(),
+			CreateRandomMixedComponentE(),
+			CreateRandomIntArrayComponent(),
+			CreateRandomFloatArrayComponent(),
+			CreateRandomIntComponent(),
+			CreateRandomFloatComponent(),
+			CreateRandomDoubleComponent(),
+			RandomString<72>(),
+			RandomString<104>(),
+			CreateRandomByteArray<128>()
+		};
+		world.AddComponent(entity, component);
+	}
+}
+
+template <typename TWorld>
+	requires ExperimentWorldLike<TWorld>
 const Entity GetRandomEntity(TWorld& world) {
 	const auto entities = world.GetEntities();
 	const size_t entityLength = static_cast<size_t>(std::ranges::distance(entities));
@@ -175,6 +228,7 @@ TimeReport RunExperimentRound(TWorld& world, const int numberOfEntities) {
 		else {
 			const auto newEntity = world.CreateEntity();
 			AddRandomComponents(world, newEntity);
+			AddRandomLargeComponents(world, newEntity);
 		}
 	}
 

@@ -6,21 +6,33 @@
 #include "experiment/experiments.h"
 #include "ecs/worlds/world0.h"
 #include "ecs/worlds/world1.h"
+#include "ecs/worlds/world2.h"
+#include "ecs/worlds/world3.h"
 #include "experiment/timeReport.h"
 #include "experiment/worldNames.h"
 
 #include "experiment/outputFormatting.h"
 
+#if USE_AMD_UPROF
+#include <AMDProfileController.h>
+#endif
+#include <keepAwake.h>
 
-using World = std::variant<World0, World1>;
+
+using World = std::variant<World0, World1, World2, World3>;
 
 const int iterationsWarmup = 100;
 const int iterationsReal = 100;
 const int numberOfEntitiesWarmup = 1000;
 const std::vector<int> entitiesSet = { 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000 };
-const std::vector<World> worlds = { World1{} };
+const std::vector<World> worlds = { World1{}, World2{}, World3{} };
 
 int main(int, char**) {
+	KeepAwakeScope keepAwake;
+
+#if USE_AMD_UPROF
+	amdProfileStrictPause();
+#endif
 
 	std::vector<std::vector<TimeReport>> timeReportSets{};
 	std::vector<std::string_view> worldNames{};

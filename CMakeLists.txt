@@ -4,6 +4,7 @@ project(ECSExperiments LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 option(ENABLE_CLANG_TIDY_ON_BUILD "Run clang-tidy during normal builds" ON)
+option(ENABLE_AMD_UPROF "Enable AMD uProf API integration" OFF)
 
 
 file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS "src/*.cpp")
@@ -17,6 +18,16 @@ target_include_directories(ECSExperiments PRIVATE
     src
     ${Stb_INCLUDE_DIR}
 )
+
+if(ENABLE_AMD_UPROF)
+    target_include_directories(ECSExperiments PRIVATE
+        "C:/Program Files/AMD/AMDuProf/include"
+    )
+    target_compile_definitions(ECSExperiments PRIVATE USE_AMD_UPROF=1)
+    target_link_libraries(ECSExperiments PRIVATE
+        "C:/Program Files/AMD/AMDuProf/lib/x64/AMDProfileController.lib"
+    )
+endif()
 
 if(MSVC)
     target_compile_options(ECSExperiments PRIVATE

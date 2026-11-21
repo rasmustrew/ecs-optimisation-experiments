@@ -36,7 +36,8 @@
             "binaryDir": "${sourceDir}/build/profile",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "RelWithDebInfo",
-                "ENABLE_CLANG_TIDY_ON_BUILD": false
+                "ENABLE_CLANG_TIDY_ON_BUILD": false,
+                "ENABLE_AMD_UPROF": true
             }
         }
     ],

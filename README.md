@@ -38,6 +38,28 @@ World1 is much faster than World0, which is what we expected.
 There are 0-10 components on each Entity, so about a 8-15x speedup is about right, 
 especially considering we were doing the loop over all components twice.
 
+## World1/World2
+
+Using AMD UProf (or similar tools) we can inspect the running of our program, 
+to see how it behaves in a real run.
+In the Flamegraph, we see that most of the time is spent in the "contains" function, 
+with most of the remainder in the creation of the tuple we send back. 
+![World1 Flamegraph](./images/Amd_Uprof_World1_Flame.png)
+It should be noted that attributing cycles to specific functions is not neccesarily super exact, 
+as its based on sampling, but it can often give a good indication. 
+
+The World1 implementation using Hashmaps causes a lot of pointer chasing to get to the data we need,
+menaing a lot of seperate data lookups, which are likely not going to be in the cache. 
+World2 attempts to cut down on this by having a Hashset of just the types, instead of a Hashmap from the types to the actual data. 
+This turns out to make no difference, as just getting to the types is still the same amount of pointer chasing. 
+
+In World 3 we instead introduce a bitset, where each bit corresponds to a component type. 
+That way, all the data we need to determine whether an Entity has the needed components, 
+is stored sequentially in memory, allowing for much more effecient data processing. 
+
+![World1 to World3](./images/World1ToWorld3.png)
+
+As we can see, the bitset is indeed much more effecient. 
 
 # Building
 

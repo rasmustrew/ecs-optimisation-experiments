@@ -9,6 +9,10 @@
 #include <vector>
 #include <string>
 
+#if USE_AMD_UPROF
+#include <AMDProfileController.h>
+#endif
+
 
 using ComponentsMap = std::unordered_map<std::type_index, std::any>;
 
@@ -121,20 +125,30 @@ public:
 	*/
 	template<ComponentType... Ts>
 	std::vector<std::tuple<Entity, Ts&...>> Query() {
+
+#if USE_AMD_UPROF
+		amdProfileStrictResume();
+#endif
+
 		std::vector<std::tuple<Entity, Ts&...>> results{};
 
-		for (auto& [entity, componentList] : Entities) {
+		for (auto& [entity, componentsMap] : Entities) {
 
 			const bool hasAll =
-				(componentList.contains(std::type_index(typeid(Ts))) && ...);
+				(componentsMap.contains(std::type_index(typeid(Ts))) && ...);
 
 			if (!hasAll) {
 				continue;
 			}
 
-			std::tuple<Entity, Ts&...> row(entity, std::any_cast<Ts&>(componentList.at(std::type_index(typeid(Ts))))...);
+			std::tuple<Entity, Ts&...> row(entity, std::any_cast<Ts&>(componentsMap.at(std::type_index(typeid(Ts))))...);
 			results.emplace_back(row);
 		}
+
+#if USE_AMD_UPROF
+		amdProfileStrictPause();
+#endif
+
 		return results;
 	}
 };

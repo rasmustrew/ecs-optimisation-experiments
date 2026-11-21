@@ -41,6 +41,10 @@ void AddRandomComponents(TWorld& world, Entity entity);
 
 template <typename TWorld>
 	requires ExperimentWorldLike<TWorld>
+void AddRandomLargeComponents(TWorld& world, Entity entity);
+
+template <typename TWorld>
+	requires ExperimentWorldLike<TWorld>
 const Entity GetRandomEntity(TWorld& world);
 
 template <typename TWorld>
