@@ -18,7 +18,6 @@
 using ComponentsMap = std::unordered_map<std::type_index, std::any>;
 
 /*
-Naive ECS implementation, used only to compare other implementations against.
 Assumption: Only 1 of any Component Type is added to an Entity
 n = number of entities
 t = number of component types
