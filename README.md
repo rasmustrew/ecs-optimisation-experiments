@@ -12,7 +12,7 @@ Here we analyse our implementations and attempt to iteratively improve upon them
 Our starting point is World0, and we will be focusing mainly on the Query function, 
 as that is what would run every frame multiple times in a real scenario. 
 
-## World0
+## World0 -> World1
 
 The complexity of Query for World0 is O(n * t_q * t), 
 where n is the number of entities, t_q is the number of queried components, and t is the total number of components an entity might have.
@@ -38,7 +38,7 @@ World1 is much faster than World0, which is what we expected.
 There are 0-10 components on each Entity, so about a 8-15x speedup is about right, 
 especially considering we were doing the loop over all components twice.
 
-## World1/World2
+## World1/World2 -> World3
 
 Using AMD UProf (or similar tools) we can inspect the running of our program, 
 to see how it behaves in a real run.
@@ -48,8 +48,14 @@ with most of the remainder in the creation of the tuple we send back.
 It should be noted that attributing cycles to specific functions is not neccesarily super exact, 
 as its based on sampling, but it can often give a good indication. 
 
+### Hypothesis
+
 The World1 implementation using Hashmaps causes a lot of pointer chasing to get to the data we need,
 menaing a lot of seperate data lookups, which are likely not going to be in the cache. 
+
+
+### Testing
+
 World2 attempts to cut down on this by having a Hashset of just the types, instead of a Hashmap from the types to the actual data. 
 This turns out to make no difference, as just getting to the types is still the same amount of pointer chasing. 
 
@@ -60,6 +66,24 @@ is stored sequentially in memory, allowing for much more effecient data processi
 ![World1 to World3](./images/World1ToWorld3.png)
 
 As we can see, the bitset is indeed much more effecient. 
+
+## World3 -> World4 (Sparse Set ECS Implementation)
+
+### Hypothesis
+We saw large improvements when we reduced the pointer chasing of the check of which entities had the right components.
+A similar improvement to the cache effeciency of reading and getting the components data will likely result in a similar improvement. 
+
+### Testing
+
+We introduce a seperate vector for each component type, allowing for dense storage and lookup of each component. 
+Alongside each of these component vectors, we have a sparse vector mapping EntityId to the index in the component vector, 
+allowing us to easily lookup in the correct place, these simple array lookups rather than the pointer chasing of the previous implementation,
+should be substantially faster. 
+We also introduce a "FreeIndexes" array to reuse deleted component slots, rather than eternally growing the arrays. 
+
+![World3 to World4](./images/World3ToWorld4.png)
+
+We do indeed see a massive improvement to the runtime in World4. 
 
 # Building
 

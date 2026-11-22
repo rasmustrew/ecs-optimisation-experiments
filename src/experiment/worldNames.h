@@ -5,6 +5,7 @@
 #include "../ecs/worlds/World1.h"
 #include "../ecs/worlds/World2.h"
 #include "../ecs/worlds/World3.h"
+#include "../ecs/worlds/World4.h"
 
 template <typename T>
 constexpr std::string_view WORLD_NAME = "UnknownWorld";
@@ -20,3 +21,6 @@ constexpr std::string_view WORLD_NAME<World2> = "World2";
 
 template <>
 constexpr std::string_view WORLD_NAME<World3> = "World3";
+
+template <>
+constexpr std::string_view WORLD_NAME<World4> = "World4";
